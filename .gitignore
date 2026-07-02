@@ -1,0 +1,9 @@
+node_modules/
+dist/
+portfolio-dist.zip
+# confidential source material — never publish
+gallery/
+.claude/
+.DS_Store
+*.log
+.github/

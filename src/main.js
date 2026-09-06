@@ -313,22 +313,28 @@ function initThree() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x05060a, 0.055);
+  scene.fog = new THREE.FogExp2(0x05060a, 0.032);
 
-  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.z = 10;
+  const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 120);
 
-  // --- Particle field ---
-  const count = 2600;
+  // --- Journey layout (camera flies down the corridor as you scroll) ---
+  const N = 8, STEP = 9, JOURNEY = (N - 1) * STEP, FRONT = 8;
+  let PAL = { a: 0x6c5cff, b: 0x00e5c8 };
+  camera.position.z = FRONT;
+
+  // --- Star corridor (particles along a long Z tunnel we fly through) ---
+  const count = 3400;
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
-  const cA = new THREE.Color(0x6c5cff);
-  const cB = new THREE.Color(0x00e5c8);
+  const cA = new THREE.Color(PAL.a);
+  const cB = new THREE.Color(PAL.b);
   for (let i = 0; i < count; i++) {
     const i3 = i * 3;
-    positions[i3] = (Math.random() - 0.5) * 26;
-    positions[i3 + 1] = (Math.random() - 0.5) * 26;
-    positions[i3 + 2] = (Math.random() - 0.5) * 26;
+    const r = 4 + Math.random() * 13;
+    const a = Math.random() * Math.PI * 2;
+    positions[i3] = Math.cos(a) * r;
+    positions[i3 + 1] = Math.sin(a) * r * 0.72;
+    positions[i3 + 2] = FRONT + 8 - Math.random() * (JOURNEY + 24);
     const c = cA.clone().lerp(cB, Math.random());
     colors[i3] = c.r; colors[i3 + 1] = c.g; colors[i3 + 2] = c.b;
   }
@@ -346,30 +352,95 @@ function initThree() {
   const points = new THREE.Points(pGeo, pMat);
   scene.add(points);
 
-  // --- Floating wireframe shapes ---
-  const shapes = [];
-  const geos = [
-    new THREE.IcosahedronGeometry(1.4, 0),
-    new THREE.TorusGeometry(1.1, 0.35, 12, 32),
-    new THREE.OctahedronGeometry(1.3, 0),
-    new THREE.DodecahedronGeometry(1.2, 0),
+  // --- Lights (so planets are shaded) ---
+  scene.add(new THREE.AmbientLight(0x556070, 0.55));
+  const sunLight = new THREE.PointLight(0xfff2cc, 2.4, 260);
+  scene.add(sunLight);
+
+  // helper canvas textures (self-contained, no external images)
+  function glowTexture(color) {
+    const cv = document.createElement('canvas'); cv.width = cv.height = 256;
+    const x = cv.getContext('2d');
+    const g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+    g.addColorStop(0, color); g.addColorStop(0.25, color); g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+    return new THREE.CanvasTexture(cv);
+  }
+  function earthTexture() {
+    const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 512;
+    const x = cv.getContext('2d');
+    const g = x.createLinearGradient(0, 0, 0, 512);
+    g.addColorStop(0, '#12365f'); g.addColorStop(0.5, '#164a86'); g.addColorStop(1, '#0e2b4d');
+    x.fillStyle = g; x.fillRect(0, 0, 1024, 512);
+    x.fillStyle = '#2f7d3a';
+    for (let k = 0; k < 80; k++) { const cx = Math.random() * 1024, cy = 70 + Math.random() * 372, r = 14 + Math.random() * 58; x.beginPath(); x.ellipse(cx, cy, r, r * (0.5 + Math.random()), Math.random() * 6, 0, 7); x.fill(); }
+    x.fillStyle = '#e6eef2'; x.fillRect(0, 0, 1024, 24); x.fillRect(0, 488, 1024, 24);
+    return new THREE.CanvasTexture(cv);
+  }
+  function pinTexture() {
+    const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+    const x = cv.getContext('2d');
+    x.strokeStyle = 'rgba(255,90,90,0.9)'; x.lineWidth = 6; x.beginPath(); x.arc(64, 64, 40, 0, 7); x.stroke();
+    x.fillStyle = '#ff5c5c'; x.beginPath(); x.arc(64, 64, 18, 0, 7); x.fill();
+    x.fillStyle = 'rgba(255,120,120,0.35)'; x.beginPath(); x.arc(64, 64, 56, 0, 7); x.fill();
+    return new THREE.CanvasTexture(cv);
+  }
+
+  // --- Sun (start of the journey) ---
+  const SUN_Z = -2;
+  const sun = new THREE.Mesh(new THREE.SphereGeometry(3, 40, 40), new THREE.MeshBasicMaterial({ color: 0xffca57 }));
+  sun.position.set(-5.5, 2.6, SUN_Z); scene.add(sun); sunLight.position.copy(sun.position);
+  const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('rgba(255,200,90,0.95)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  sunGlow.scale.set(17, 17, 1); sunGlow.position.copy(sun.position); scene.add(sunGlow);
+
+  // --- Planets down the corridor ---
+  const PLAN = [
+    { z: -13, r: 0.7, x: 3.6, y: -1.2, color: 0xb08a5a },
+    { z: -22, r: 1.1, x: -4.2, y: 1.5, color: 0xd9a066 },
+    { z: -31, r: 0.9, x: 4.4, y: 1.0, color: 0xc0603a },
+    { z: -40, r: 1.7, x: -5, y: -1.9, color: 0xe0b070, ring: true },
+    { z: -49, r: 1.2, x: 4.6, y: 1.7, color: 0x8ab4d8 },
   ];
-  geos.forEach((geo, i) => {
-    const mat = new THREE.MeshBasicMaterial({
-      color: i % 2 ? 0x00e5c8 : 0x6c5cff,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.35,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set((i - 1.5) * 5.5, (Math.sin(i) * 3), -3 - i);
-    mesh.userData.speed = 0.002 + i * 0.001;
-    shapes.push(mesh);
-    scene.add(mesh);
+  const planets = [];
+  PLAN.forEach((p) => {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(p.r, 32, 32), new THREE.MeshStandardMaterial({ color: p.color, roughness: 1, metalness: 0 }));
+    m.position.set(p.x, p.y, p.z); scene.add(m); planets.push(m);
+    if (p.ring) { const ring = new THREE.Mesh(new THREE.RingGeometry(p.r * 1.4, p.r * 2.2, 48), new THREE.MeshBasicMaterial({ color: 0xd9c39a, side: THREE.DoubleSide, transparent: true, opacity: 0.5 })); ring.rotation.set(Math.PI * 0.42, 0.3, 0); m.add(ring); }
   });
+
+  // --- Earth + Sri Lanka (the finale) ---
+  const EARTH_Z = -58, EARTH_R = 2.6;
+  const earth = new THREE.Group(); earth.position.set(0, 0, EARTH_Z); scene.add(earth);
+  earth.add(new THREE.Mesh(new THREE.SphereGeometry(EARTH_R, 48, 48), new THREE.MeshStandardMaterial({ map: earthTexture(), roughness: 1, metalness: 0 })));
+  const earthGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('rgba(120,180,255,0.55)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  earthGlow.scale.set(EARTH_R * 4, EARTH_R * 4, 1); earth.add(earthGlow);
+  // fill light so the camera-facing (day) side of Earth is lit on the dive-in
+  const earthFill = new THREE.PointLight(0xcfe0ff, 1.8, 80);
+  earthFill.position.set(8, 6, EARTH_Z + 16); scene.add(earthFill);
+  const slLat = 7 * Math.PI / 180, slLon = 80 * Math.PI / 180;
+  const slPos = new THREE.Vector3(EARTH_R * Math.cos(slLat) * Math.sin(slLon), EARTH_R * Math.sin(slLat), EARTH_R * Math.cos(slLat) * Math.cos(slLon));
+  const marker = new THREE.Sprite(new THREE.SpriteMaterial({ map: pinTexture(), transparent: true, depthWrite: false }));
+  marker.position.copy(slPos); marker.scale.set(0.6, 0.6, 1); earth.add(marker);
+  const targetRot = -slLon;
+
+  // floating "Sri Lanka" label (projected to screen at the finale)
+  const slLabel = document.createElement('div');
+  slLabel.id = 'sl-label';
+  slLabel.style.cssText = 'position:fixed;z-index:3;transform:translate(-50%,-150%);pointer-events:none;opacity:0;transition:opacity .3s ease;text-align:center;white-space:nowrap;font-family:var(--font-mono),monospace;text-shadow:0 2px 14px rgba(0,0,0,.95)';
+  slLabel.innerHTML = '<div style="font-size:.95rem;letter-spacing:.14em;color:#ff6b6b">📍 SRI LANKA</div><div style="font-size:.72rem;color:#cfd6e6;margin-top:2px">Pilimathalawa, Kandy · home</div>';
+  document.body.appendChild(slLabel);
+
+  // --- Moon orbiting Earth ---
+  const MOON_ORBIT = 6.2;
+  const moon = new THREE.Mesh(
+    new THREE.SphereGeometry(0.7, 32, 32),
+    new THREE.MeshStandardMaterial({ color: 0xbdbdbd, roughness: 1, metalness: 0 })
+  );
+  scene.add(moon);
 
   // --- Theme recolor hook (called by the theme picker) ---
   window.__setScene = (aHex, bHex, fogHex) => {
+    PAL.a = aHex; PAL.b = bHex;
     const A = new THREE.Color(aHex), B = new THREE.Color(bHex);
     const col = pGeo.attributes.color;
     for (let i = 0; i < count; i++) {
@@ -377,7 +448,6 @@ function initThree() {
       col.array[i * 3] = c.r; col.array[i * 3 + 1] = c.g; col.array[i * 3 + 2] = c.b;
     }
     col.needsUpdate = true;
-    shapes.forEach((s, i) => s.material.color.set(i % 2 ? bHex : aHex));
     if (fogHex != null && scene.fog) scene.fog.color.set(fogHex);
   };
 
@@ -393,24 +463,58 @@ function initThree() {
   window.addEventListener('scroll', () => { scrollY = window.scrollY; });
 
   const clock = new THREE.Clock();
+  const ss = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const tmp = new THREE.Vector3();
   function animate() {
     const t = clock.getElapsedTime();
-    points.rotation.y = t * 0.03;
-    points.rotation.x = t * 0.01;
+    points.rotation.z = t * 0.015;           // stars swirl gently as we fly
 
-    shapes.forEach((s, i) => {
-      s.rotation.x += s.userData.speed;
-      s.rotation.y += s.userData.speed * 1.3;
-      s.position.y += Math.sin(t + i) * 0.003;
-    });
-
+    // scroll flies the camera down the solar corridor; the last stretch dives into Earth
     const scrollNorm = scrollY / (document.body.scrollHeight - window.innerHeight || 1);
-    camera.position.z = 10 - scrollNorm * 4;
-    camera.position.x += (mouse.x * 2 - camera.position.x) * 0.04;
-    camera.position.y += (-mouse.y * 2 - camera.position.y) * 0.04;
-    camera.lookAt(0, 0, 0);
+    const finale = ss(0.82, 1, scrollNorm);
+
+    let targetZ = FRONT - scrollNorm * JOURNEY;
+    targetZ = targetZ * (1 - finale) + (EARTH_Z + 6.4) * finale;
+    camera.position.z += (targetZ - camera.position.z) * 0.06;
+    const tx = mouse.x * 3 * (1 - finale), ty = -mouse.y * 2 * (1 - finale);
+    camera.position.x += (tx - camera.position.x) * 0.05;
+    camera.position.y += (ty - camera.position.y) * 0.05;
+    camera.lookAt(camera.position.x * 0.3 * (1 - finale), camera.position.y * 0.3 * (1 - finale), camera.position.z - 9);
+
+    // sun + planets rotate
+    sun.rotation.y += 0.0012;
+    planets.forEach((m, i) => { m.rotation.y += 0.003 + i * 0.0009; });
+
+    // moon orbits Earth
+    const ma = t * 0.3;
+    moon.position.set(
+      earth.position.x + Math.cos(ma) * MOON_ORBIT,
+      earth.position.y + Math.sin(ma * 0.5) * 1.4,
+      earth.position.z + Math.sin(ma) * MOON_ORBIT
+    );
+    moon.rotation.y += 0.003;
+
+    // Earth spins, then eases round to present Sri Lanka to the camera on the dive-in
+    earth.scale.setScalar(1 + finale * 0.18);
+    if (finale < 0.06) {
+      earth.rotation.y += 0.0016;
+    } else {
+      let d = (targetRot - earth.rotation.y) % (Math.PI * 2);
+      if (d > Math.PI) d -= Math.PI * 2;
+      if (d < -Math.PI) d += Math.PI * 2;
+      earth.rotation.y += d * 0.07;
+    }
+    marker.scale.setScalar(0.55 + Math.sin(t * 3) * 0.08 + finale * 0.25);
 
     renderer.render(scene, camera);
+
+    // project the Sri Lanka pin to screen space for the floating label
+    marker.getWorldPosition(tmp);
+    const proj = tmp.clone().project(camera);
+    slLabel.style.left = (proj.x * 0.5 + 0.5) * window.innerWidth + 'px';
+    slLabel.style.top = (-proj.y * 0.5 + 0.5) * window.innerHeight + 'px';
+    slLabel.style.opacity = (finale > 0.3 && proj.z < 1) ? String(Math.min(1, finale)) : '0';
+
     requestAnimationFrame(animate);
   }
   animate();
@@ -554,7 +658,7 @@ function initHype() {
 
   const SHOTS = [
     { t: 'hook' },
-    { t: 'photo', img: '/photos/about.jpg', name: 'NIPUNA', sub: 'THE DATA SORCERER' },
+    { t: 'photo', img: '/photos/about.jpg', name: 'NIPUNA', sub: 'DATA SCIENTIST' },
     { t: 'tag', big: 'B.Sc. (Hons)\nDATA SCIENCE', small: 'SLIIT · Second Class ✦' },
     { t: 'tag', big: 'ASSOCIATE\nDATA SCIENTIST', small: '@ MAS HOLDINGS', badge: true },
     { t: 'viz', viz: 'capex', stamp: 'POWER BI' },
@@ -574,7 +678,7 @@ function initHype() {
     const el = document.createElement('div');
     el.className = 'hype-shot shot-' + s.t;
     if (s.t === 'hook') {
-      el.innerHTML = `<div class="hs-inner"><div class="hk-pov slam">POV:</div><div class="hk-sub slam d1">you just met</div><div class="hk-big glitch d2">THE DATA<br>SORCERER</div></div>`;
+      el.innerHTML = `<div class="hs-inner"><div class="hk-pov slam">POV:</div><div class="hk-sub slam d1">you just met</div><div class="hk-big glitch d2">THE WIZARD<br>OF DATA</div></div>`;
     } else if (s.t === 'photo') {
       el.innerHTML = `<img class="hs-img kenburns" src="${s.img}" alt=""><div class="hs-grad"></div><div class="hs-inner"><div class="hs-name slam">${s.name}</div><div class="hs-sub slam d1">${s.sub}</div></div>`;
       el.style.placeItems = 'end center'; el.style.paddingBottom = '70px';
@@ -681,7 +785,7 @@ function initWizard() {
 
   const SCENES = [
     { html: `<div><div class="wiz-kicker wiz-pop">✦ The Daily Prophet ✦</div><div class="wiz-sub wiz-ink d1">— presents —</div></div>`, dur: 2000 },
-    { html: `<div><div class="wiz-line wiz-ink">A DATA SORCERER</div><div class="wiz-line wiz-ink d1">AT MAS HOLDINGS</div></div>`, dur: 2600 },
+    { html: `<div><div class="wiz-line wiz-ink">RAW DATA,</div><div class="wiz-line wiz-ink d1">REAL DECISIONS.</div></div>`, dur: 2600 },
     { html: `<div><div class="wiz-frame wiz-pop"><img src="/photos/about.jpg" alt=""></div><div class="wiz-cap wiz-ink d1">Nipuna Abeysekara</div></div>`, dur: 2800 },
     { html: `<div><div class="wiz-kicker wiz-pop">Powers Discovered</div><div class="wiz-words" style="margin-top:22px"><span class="wiz-word">POWER BI</span><span class="wiz-word" style="animation-delay:.3s">MACHINE LEARNING</span><span class="wiz-word" style="animation-delay:.6s">POWER APPS</span></div></div>`, dur: 2600 },
     { html: `<div><div class="wiz-kicker wiz-pop">The Enchanted Ledgers</div><div class="wiz-plates" style="margin-top:26px"><div class="wiz-plate">${MOCKS.capex}</div><div class="wiz-plate">${MOCKS.machine}</div><div class="wiz-plate">${MOCKS.recon}</div></div></div>`, dur: 2800 },
@@ -802,8 +906,8 @@ function initCinema() {
 
   // Daily Prophet reel (scrolls inside the newspaper overlay)
   const PROPHET_SCENES = [
-    { sel: '.dp-title', chapter: 'Extra! Extra!', title: 'The Daily Prophet', detail: 'A special dispatch on a rising data sorcerer.', hold: 4200 },
-    { sel: '.dp-headline', chapter: 'Front Page', title: 'A Data Sorcerer at MAS', detail: 'SLIIT graduate Nipuna Abeysekara bewitches the apparel giant with moving dashboards.', hold: 4800 },
+    { sel: '.dp-title', chapter: 'Extra! Extra!', title: 'The Daily Prophet', detail: 'A special dispatch on a rising data scientist.', hold: 4200 },
+    { sel: '.dp-headline', chapter: 'Front Page', title: 'The Wizard of Data', detail: 'SLIIT graduate Nipuna Abeysekara turns raw factory data into decisions with moving dashboards.', hold: 4800 },
     { sel: '.living-photo', chapter: 'The Sorcerer', title: 'Nipuna Abeysekara', detail: 'Associate Data Scientist — from Twinery to the MCAP / Machine Build team.', hold: 4600 },
     { sel: '.dp-box', chapter: 'The Grimoire', title: 'Powers & Enchantments', detail: 'Python · Power BI · DAX · Machine Learning · Power Apps.', hold: 4200 },
     { sel: '.dp-feature-title', chapter: 'Special Report', title: 'The Enchanted Ledgers', detail: 'CapEx, machine census, reconciliation, Solution Box & a Power App.', hold: 4800 },

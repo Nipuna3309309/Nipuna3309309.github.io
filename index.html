@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nipuna Abeysekara · Data Scientist</title>
+  <meta name="description" content="Nipuna Abeysekara — Data Science (Hons) graduate and Associate Data Scientist at MAS Holdings. 3D interactive portfolio featuring BI, machine learning and full-stack projects." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&family=UnifrakturMaguntia&family=Pirata+One&family=IM+Fell+English:ital@0;1&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Cinzel:wght@500;700;900&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet" />
+  <script type="module" crossorigin src="./assets/index-BOAvIeG2.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-Cg1Y86xY.css">
+</head>
+<body>
+  <!-- Loader -->
+  <div id="loader">
+    <div class="loader-inner">
+      <div class="loader-name">NIPUNA<span>ABEYSEKARA</span></div>
+      <div class="loader-bar"><span id="loader-fill"></span></div>
+      <div class="loader-pct"><span id="loader-pct">0</span>%</div>
+    </div>
+  </div>
+
+  <!-- Theme picker -->
+  <div id="theme-switch" class="theme-switch">
+    <button id="theme-switch-btn" class="theme-switch-btn" aria-haspopup="true" aria-expanded="false">
+      <span class="ts-dot"></span><span id="theme-switch-label">Sci-Fi</span><span class="ts-caret">▾</span>
+    </button>
+    <div id="theme-menu" class="theme-menu" role="menu">
+      <button data-theme="scifi" class="active" role="menuitem">✦&nbsp;&nbsp;Sci-Fi</button>
+      <button data-theme="realm" role="menuitem">⚔&nbsp;&nbsp;Iron Realm</button>
+      <button data-theme="dark" role="menuitem">☾&nbsp;&nbsp;Dark</button>
+      <button data-theme="prophet" role="menuitem">⚡&nbsp;&nbsp;Daily Prophet</button>
+    </div>
+  </div>
+
+  <!-- Watch cinematic intro -->
+  <button id="watch-intro" class="watch-intro" aria-label="Watch cinematic intro">
+    <span class="wi-play">▶</span>
+    <span>Watch&nbsp;intro</span>
+  </button>
+
+  <!-- TikTok-style hype reel -->
+  <button id="hype-launch" class="hype-launch" aria-label="Play hype reel">
+    <span class="hl-bolt">⚡</span>
+    <span>Hype&nbsp;reel</span>
+  </button>
+
+  <div id="hype" class="hype" aria-hidden="true">
+    <div class="hype-stage" id="hype-stage">
+      <div class="hype-bars" id="hype-bars"></div>
+      <div class="hype-handle">@nipuna.data <span>· follows you</span></div>
+      <button class="hype-close" id="hype-close" aria-label="Close hype reel">✕</button>
+      <div class="hype-shots" id="hype-shots"></div>
+      <div class="hype-scan"></div>
+      <div class="hype-hint" id="hype-hint">tap ✕ or press Esc to close</div>
+    </div>
+  </div>
+
+  <!-- Cinematic tour overlay -->
+  <div id="cine" class="cine" aria-hidden="true">
+    <div class="cinebar top"></div>
+    <div class="cinebar bottom"></div>
+    <div class="cine-vignette"></div>
+    <div class="cine-caption" id="cine-caption">
+      <span class="cine-chapter" id="cine-chapter"></span>
+      <h3 class="cine-title" id="cine-title"></h3>
+      <p class="cine-detail" id="cine-detail"></p>
+    </div>
+    <div class="cine-progress"><span id="cine-progress-fill"></span></div>
+    <button class="cine-skip" id="cine-skip">Skip intro ✕</button>
+    <div class="cine-idle-note" id="cine-idle-note">Playing showreel — move your mouse or press a key to explore yourself</div>
+  </div>
+
+  <!-- 3D canvas background -->
+  <canvas id="webgl"></canvas>
+
+  <!-- Theme atmosphere layer (vignette / grain per theme) -->
+  <div class="theme-fx" aria-hidden="true"></div>
+
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-dot" id="cursor-dot"></div>
+
+  <!-- Progress rail -->
+  <div class="scroll-progress"><span id="scroll-fill"></span></div>
+
+  <!-- Nav -->
+  <header class="nav">
+    <a href="#hero" class="nav-logo">NA<span>.</span></a>
+    <nav class="nav-links">
+      <a href="#about" data-link>About</a>
+      <a href="#experience" data-link>Experience</a>
+      <a href="#skills" data-link>Skills</a>
+      <a href="#work" data-link>Work</a>
+      <a href="#education" data-link>Education</a>
+      <a href="#contact" data-link>Contact</a>
+    </nav>
+    <a href="/Nipuna_Abeysekara_CV.pdf" target="_blank" class="nav-cta" data-hover>Résumé ↗</a>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="hero" class="section hero">
+      <div class="hero-tag reveal">Associate Data Scientist @ MAS · B.Sc. (Hons) Data Science</div>
+      <h1 class="hero-title">
+        <span class="line"><span>NIPUNA</span></span>
+        <span class="line"><span>ABEYSEKARA</span></span>
+      </h1>
+      <p class="hero-sub reveal">
+        Data Science graduate turning raw data into decisions —
+        <em>BI pipelines, machine-learning models &amp; full-stack builds.</em>
+      </p>
+      <div class="hero-actions reveal">
+        <a href="#work" class="btn btn-primary" data-hover>View my work</a>
+        <a href="#contact" class="btn btn-ghost" data-hover>Let's work together</a>
+      </div>
+      <div class="hero-scroll">
+        <span>Scroll</span>
+        <div class="mouse"><span></span></div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section about">
+      <div class="section-head reveal">
+        <span class="idx">01</span>
+        <h2>About</h2>
+      </div>
+      <div class="about-grid">
+        <div class="about-photo reveal">
+          <div class="tilt" data-tilt>
+            <img src="./photos/about.jpg" alt="Nipuna Abeysekara" loading="lazy" />
+            <div class="tilt-glow"></div>
+          </div>
+        </div>
+        <div class="about-text">
+          <p class="reveal lead">
+            I'm <strong>Nipuna Abeysekara</strong> — a Data Science graduate
+            (B.Sc. Hons, Second Class) from SLIIT, now an
+            <strong>Associate Data Scientist at MAS Holdings</strong>.
+          </p>
+          <p class="reveal">
+            I turn messy data into clear, decision-ready insight. My work spans the full
+            analytics stack — designing data warehouses and ETL pipelines with the Microsoft
+            BI stack, building and evaluating machine-learning models in Python, and shipping
+            full-stack MERN applications. I like problems that sit between engineering rigor
+            and human storytelling.
+          </p>
+          <div class="about-facts">
+            <div class="fact reveal"><span class="num" data-count="11">0</span><span class="lbl">Months @ MAS</span></div>
+            <div class="fact reveal"><span class="num" data-count="9">0</span><span class="lbl">Certifications</span></div>
+            <div class="fact reveal"><span class="num" data-count="5">0</span><span class="lbl">Major projects</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section id="experience" class="section experience">
+      <div class="section-head reveal">
+        <span class="idx">02</span>
+        <h2>Experience</h2>
+      </div>
+      <div class="exp-list" id="exp-list"></div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills" class="section skills">
+      <div class="section-head reveal">
+        <span class="idx">03</span>
+        <h2>Skills &amp; Tooling</h2>
+      </div>
+      <div class="skills-grid" id="skills-grid"></div>
+      <div class="marquee">
+        <div class="marquee-track" id="marquee-track"></div>
+      </div>
+    </section>
+
+    <!-- WORK -->
+    <section id="work" class="section work">
+      <div class="section-head reveal">
+        <span class="idx">04</span>
+        <h2>Selected Work</h2>
+      </div>
+
+      <h3 class="work-group-title reveal"><span>Internship Work</span> · MAS Holdings</h3>
+      <div class="mas-work-grid" id="mas-work"></div>
+
+      <h3 class="work-group-title reveal" style="margin-top:70px"><span>Academic Projects</span></h3>
+      <div class="work-list" id="work-list"></div>
+    </section>
+
+    <!-- EDUCATION -->
+    <section id="education" class="section education">
+      <div class="section-head reveal">
+        <span class="idx">05</span>
+        <h2>Education</h2>
+      </div>
+      <div class="edu-grid">
+        <div class="edu-photo reveal">
+          <div class="tilt" data-tilt>
+            <img src="./photos/education.jpg" alt="Nipuna Abeysekara — graduation" loading="lazy" />
+            <div class="tilt-glow"></div>
+          </div>
+        </div>
+        <div class="edu-timeline" id="edu-timeline"></div>
+      </div>
+    </section>
+
+    <!-- GALLERY (3D) -->
+    <section id="gallery" class="section gallery">
+      <div class="section-head reveal">
+        <span class="idx">06</span>
+        <h2>Moments</h2>
+      </div>
+      <p class="gallery-hint reveal">Drag to rotate · a few frames from the journey</p>
+      <div class="gallery-stage" id="gallery-stage"></div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section contact">
+      <div class="contact-inner">
+        <p class="contact-kicker reveal">07 — Let's build something</p>
+        <h2 class="contact-title reveal">Open to <em>work</em> with your team.</h2>
+        <a href="mailto:nipunaabeysekara2001@gmail.com" class="contact-mail reveal" data-hover>nipunaabeysekara2001@gmail.com</a>
+        <div class="contact-links reveal">
+          <a href="tel:0716329756" data-hover>+94 71 632 9756</a>
+          <a href="/Nipuna_Abeysekara_CV.pdf" target="_blank" data-hover>Résumé ↗</a>
+          <a href="https://www.linkedin.com/" target="_blank" data-hover>LinkedIn ↗</a>
+        </div>
+      </div>
+      <footer class="footer">
+        <span>© <span id="year"></span> Nipuna Abeysekara</span>
+        <span>Built with Three.js · GSAP</span>
+      </footer>
+    </section>
+  </main>
+
+  <!-- ===================== DAILY PROPHET (Harry Potter theme) ===================== -->
+  <!-- Daily Prophet ambient music (drop a royalty-free track at public/audio/prophet-theme.mp3) -->
+  <audio id="dp-audio" loop preload="none">
+    <source src="/audio/prophet-theme.mp3" type="audio/mpeg" />
+    <source src="/audio/prophet-theme.ogg" type="audio/ogg" />
+  </audio>
+
+  <div id="prophet" class="prophet" aria-hidden="true">
+    <button id="dp-music" class="dp-music" aria-label="Toggle music" title="Toggle music">
+      <span class="dp-music-icon">🎵</span>
+      <span class="dp-eq"><i></i><i></i><i></i><i></i></span>
+    </button>
+    <button id="dp-watch" class="dp-music dp-watch" aria-label="Watch the story">
+      <span class="wi-play">▶</span>
+      <span>Watch&nbsp;the&nbsp;story</span>
+    </button>
+    <button id="dp-trailer" class="dp-music dp-trailer" aria-label="Play the wizarding trailer">
+      <span class="wi-play">✦</span>
+      <span>Play&nbsp;trailer</span>
+    </button>
+    <div class="dp-embers" id="dp-embers" aria-hidden="true"></div>
+    <div class="dp-flash" id="dp-flash" aria-hidden="true"></div>
+    <div class="prophet-paper">
+      <!-- Masthead -->
+      <header class="dp-masthead">
+        <div class="dp-meta-left">No. 22154576</div>
+        <div class="dp-title">The Daily Prophet</div>
+        <div class="dp-meta-right">Price 5 Knuts</div>
+      </header>
+      <div class="dp-rule">
+        <span>WIZARDING WORLD OF DATA &amp; SORCERY</span>
+        <span id="dp-date">Malabe · Sri Lanka</span>
+        <span>“TURNING RAW DATA INTO DECISIONS”</span>
+      </div>
+
+      <!-- Main headline -->
+      <h1 class="dp-headline">THE WIZARD OF DATA</h1>
+      <p class="dp-subhead">SLIIT graduate <em>Nipuna Abeysekara</em> bewitches the apparel giant with moving dashboards, enchanted machine-counts and self-writing reports.</p>
+
+      <div class="dp-columns">
+        <!-- Column 1 -->
+        <div class="dp-col">
+          <figure class="living-photo">
+            <div class="lp-frame">
+              <img src="./photos/about.jpg" alt="Nipuna Abeysekara" />
+              <div class="lp-grain"></div>
+              <div class="lp-flicker"></div>
+            </div>
+            <figcaption>MR N. ABEYSEKARA, photographed at the MAS Innovation &amp; Technology halls, is said to make numbers <em>dance</em>.</figcaption>
+          </figure>
+          <p class="dp-drop"><span class="dp-dropcap">O</span>UR correspondent reports that a young data scientist has been quietly transforming the great manufacturing houses of the realm. Where others see spreadsheets, Mr Abeysekara sees prophecy — coaxing raw operational data into decisions with little more than Python, Power&nbsp;BI and a steady wand hand.</p>
+          <p>A <strong>Bachelor of Science (Honours) in Information Technology</strong>, specialising in Data Science, he graduated from the S.L.I.I.T. academy with a Second Class and promptly took up a post as <strong>Associate Data Scientist</strong> at MAS Holdings.</p>
+        </div>
+
+        <!-- Column 2 -->
+        <div class="dp-col">
+          <p>His first four moons were served in <strong>Twinery</strong>, the innovation arm, before he was called to the <strong>MCAP / Machine Build</strong> team — where, sources whisper, he conjures interactive dashboards for CapEx tracking, savings analysis and machine reconciliation across the production divisions.</p>
+          <blockquote class="dp-quote">“I turn messy data into clear, decision-ready insight — one enchanted dashboard at a time.”</blockquote>
+          <p>Perhaps most curious is his reconciliation charm, which compares the <em>inventory scrolls</em> against physically-scanned machines to reveal those <em>matched, missing</em> and <em>mismatched</em> — a feat that has much improved machine governance across the factories.</p>
+          <figure class="living-photo small">
+            <div class="lp-frame">
+              <img src="./photos/education.jpg" alt="The graduate" />
+              <div class="lp-grain"></div>
+              <div class="lp-flicker"></div>
+            </div>
+            <figcaption>THE GRADUATE, pictured in Kandy.</figcaption>
+          </figure>
+        </div>
+
+        <!-- Column 3 -->
+        <div class="dp-col">
+          <div class="dp-box">
+            <h3 class="dp-box-title">✦ Powers &amp; Enchantments ✦</h3>
+            <ul class="dp-list">
+              <li>Python, SQL, Java, JavaScript, PHP, Kotlin</li>
+              <li>Power BI · DAX · SSIS · SSAS · ETL · OLAP</li>
+              <li>Machine Learning — Regression, Classification, CNNs, RNNs</li>
+              <li>Power Apps low-code sorcery</li>
+              <li>MongoDB · MySQL · SQL Server</li>
+            </ul>
+          </div>
+          <figure class="living-photo small">
+            <div class="lp-frame">
+              <img src="./photos/team1_web.jpg" alt="The MAS team" />
+              <div class="lp-grain"></div>
+              <div class="lp-flicker"></div>
+            </div>
+            <figcaption>THE MACHINE BUILD ORDER, assembled.</figcaption>
+          </figure>
+          <div class="dp-classified">
+            <h3 class="dp-box-title">— OWL POST —</h3>
+            <p>To reach Mr Abeysekara, dispatch an owl to<br/>
+            <a href="mailto:nipunaabeysekara2001@gmail.com">nipunaabeysekara2001@gmail.com</a><br/>
+            or ring the enchanted mirror: <strong>+94&nbsp;71&nbsp;632&nbsp;9756</strong></p>
+            <a class="dp-cta" href="/Nipuna_Abeysekara_CV.pdf" target="_blank">Read the full scroll (Résumé) ✒</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPECIAL REPORT: the work -->
+      <section class="dp-feature">
+        <div class="dp-feature-head">
+          <span class="dp-feature-kicker">✦ Special Report ✦</span>
+          <h2 class="dp-feature-title">The Enchanted Ledgers of MAS</h2>
+          <p class="dp-feature-lead">Rare plates, obtained at great peril, of the moving dashboards said to run the great apparel houses. Readers are advised the figures within may still be <em>enchanted</em>.</p>
+        </div>
+        <div class="dp-plates" id="dp-plates">
+          <figure class="dp-plate">
+            <div class="lp-frame plate" data-viz="capex"><div class="lp-grain"></div><div class="lp-flicker"></div></div>
+            <figcaption><strong>THE GALLEON LEDGER.</strong> Capital expenditure, purchase orders &amp; savings gathered in a single enchanted pane <span class="dp-cap-tool">Power BI</span></figcaption>
+          </figure>
+          <figure class="dp-plate">
+            <div class="lp-frame plate" data-viz="machine"><div class="lp-grain"></div><div class="lp-flicker"></div></div>
+            <figcaption><strong>THE CENSUS OF MACHINES.</strong> The whole machine fleet counted by brand, type &amp; division <span class="dp-cap-tool">Power BI</span></figcaption>
+          </figure>
+          <figure class="dp-plate">
+            <div class="lp-frame plate" data-viz="recon"><div class="lp-grain"></div><div class="lp-flicker"></div></div>
+            <figcaption><strong>THE RECKONING.</strong> Inventory reports weighed against scanned iron; the missing revealed at last <span class="dp-cap-tool">Power BI</span></figcaption>
+          </figure>
+          <figure class="dp-plate">
+            <div class="lp-frame plate" data-viz="solution"><div class="lp-grain"></div><div class="lp-flicker"></div></div>
+            <figcaption><strong>THE BOX OF SOLUTIONS.</strong> Operational savings conjured across divisions to rank the highest-impact fixes <span class="dp-cap-tool">Power BI</span></figcaption>
+          </figure>
+          <figure class="dp-plate wide">
+            <div class="lp-frame plate" data-viz="app"><div class="lp-grain"></div><div class="lp-flicker"></div></div>
+            <figcaption><strong>THE CAPEX GUIDE.</strong> A self-writing ledger for the shop floor — searchable by machine, brand &amp; operator <span class="dp-cap-tool">Power Apps</span></figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <footer class="dp-foot">
+        <span>Continued on page 394 — “Of Dashboards &amp; Destiny”</span>
+        <button id="dp-exit" class="dp-exit">Return to the Muggle site ✕</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===================== WIZARDING TRAILER (produced video) ===================== -->
+  <div id="wizard" class="wizard" aria-hidden="true">
+    <div class="wiz-embers" id="wiz-embers" aria-hidden="true"></div>
+    <div class="wiz-candle"></div>
+    <div class="cinebar top wiz-bar"></div>
+    <div class="cinebar bottom wiz-bar"></div>
+    <div class="wiz-flash" id="wiz-flash"></div>
+    <div class="wiz-scenes" id="wiz-scenes"></div>
+    <div class="wiz-progress"><span id="wiz-progress-fill"></span></div>
+    <button class="wiz-skip" id="wiz-skip">Skip trailer ✕</button>
+  </div>
+
+</body>
+</html>
